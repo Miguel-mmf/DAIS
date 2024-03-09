@@ -1,0 +1,6 @@
+"./conf_gpio.obj"
+"./project0.obj"
+"./startup_ccs.obj"
+"../project0_ccs.cmd"
+-llibc.a
+-l"C:/ti/tivaware_c_series_2_1_4_178/driverlib/ccs/Debug/driverlib.lib"
