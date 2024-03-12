@@ -7,8 +7,8 @@
 #include <Countdown.h>
 #include <MQTTClient.h>
 #include <math.h>
-
-double t = 0;
+  
+//double t = 0;
 int resistencia = 100;
 char printbuf[100];
 int arrivedcount = 0;
@@ -30,20 +30,22 @@ MQTT::Client<EthernetStack, Countdown> client = MQTT::Client<EthernetStack, Coun
 
 byte mac[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };  // replace with your device's MAC
 const char* topic_correnteA = "mqtt/correnteA";
-const char* topic_correnteB = "mqtt/correnteB";
-const char* topic_correnteC = "mqtt/correnteC";
 const char* topic_tensaoA = "mqtt/tensaoA";
+/* const char* topic_correnteB = "mqtt/correnteB";
+const char* topic_correnteC = "mqtt/correnteC";
 const char* topic_tensaoB = "mqtt/tensaoB";
 const char* topic_tensaoC = "mqtt/tensaoC";
+*/
 
-
-double Va = 0;
+int valor = 0;
+float Va = 0.0;
+float Ia = 0.0;
+/*
 float Vb = 0;
 float Vc = 0;
-double Ia = 0;
 float Ib = 0;
 float Ic = 0;
-
+*/
 
 void connect()
 {
@@ -69,7 +71,7 @@ void connect()
     Serial.print(printbuf);
   }
   Serial.println("MQTT connected");
-  
+
   rc = client.subscribe(topic_tensaoA, MQTT::QOS2, messageArrived);   
   if (rc != 0)
   {
@@ -112,14 +114,24 @@ void loop()
   
   arrivedcount = 0;
 
-  Va = 380*sin((2*PI*60*t)*PI/180); // deveria ser 60Hz
+  /*
+  float t = millis()/1000;
+  Va = 380.0*sin(2*PI*60*t); // deveria ser 60Hz
   Serial.print(Va);
-  Ia = Va/resistencia;
+  */
+  //Ia = Va/resistencia;
+  //Ia = 10.0*sin(2*PI*60*t + PI/2); // defasamento de 90°
+  //Serial.print(Ia);
   
   // Send and receive QoS 0 message
   char buf[100];
-  sprintf(buf, Va);
-  //itoa(Va,buf,10);
+  // sprintf(buf, "%f", Va);
+  if (valor < 100)
+    valor++;
+  else
+    valor = -100;
+    
+  itoa(valor,buf,10);
   
   Serial.println(buf);
   // Serial.print(" --> ");
@@ -128,11 +140,14 @@ void loop()
   message.retained = false;
   message.dup = false;
   message.payload = (void*)buf;
+  // Serial.println(strlen(buf));
   message.payloadlen = strlen(buf)+1;
+  
   int rc = client.publish(topic_tensaoA, message);
   while (arrivedcount == 0)
     client.yield(1000);
 
+  /*
   sprintf(buf, Ia);
   Serial.println(buf);
   message.payload = (void*)buf;
@@ -142,6 +157,7 @@ void loop()
     client.yield(1000);
 
   t = t + 0.00001;
-  delay(1);
-  Serial.println(t);
+  */
+  delay(10);
+  //Serial.println(t);
 }
